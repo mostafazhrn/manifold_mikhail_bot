@@ -63,8 +63,8 @@ Environment configuration
 
 🛠 Installation
 1️⃣ Clone the repository
-git clone https://github.com/YOUR_USERNAME/zizo-bot.git
-cd zizo-bot
+git clone https://github.com/mostafazhrn/manifold_mikhail_bot.git
+cd manifold_mikhail_bot
 
 2️⃣ Create & activate local virtual environment (Windows)
 python -m venv winvenv
@@ -80,7 +80,97 @@ python scripts/system_check.py
 If everything is okay, you’ll see:
 
 === All checks completed successfully. ===
+ZIZO Bot uses a local LLM via Ollama, pointing to:
 
+
+
+If Ollama is not installed or not running, download and configure it using the steps below.
+
+🪟 Windows Installation
+1️⃣ Install Ollama
+
+Download and install from:
+https://ollama.com/download
+
+2️⃣ Start the Ollama server
+ollama serve
+
+3️⃣ Verify it is running
+
+Open your browser:
+
+http://127.0.0.1:11434/api/tags
+
+
+You should see JSON output.
+
+🍎 macOS Installation
+1️⃣ Install via Homebrew
+brew install ollama
+
+2️⃣ Start the service
+brew services start ollama
+
+3️⃣ Check server
+curl http://127.0.0.1:11434/api/tags
+
+🐧 Linux Installation
+1️⃣ Install Ollama
+curl -fsSL https://ollama.com/install.sh | sh
+
+2️⃣ Start the service
+systemctl start ollama
+
+3️⃣ Enable on boot
+systemctl enable ollama
+
+🌐 Exposing Ollama to the Network (Optional)
+
+If you want other machines to use your Ollama instance, edit:
+
+Windows
+%USERPROFILE%\.ollama\config
+
+macOS / Linux
+~/.ollama/config
+
+
+Add:
+
+[api]
+address = "0.0.0.0:11434"
+
+
+Restart the service:
+
+Windows:
+
+taskkill /IM ollama.exe /F
+ollama serve
+
+
+macOS:
+
+brew services restart ollama
+
+
+Linux:
+
+systemctl restart ollama
+
+🔌 Forcing Ollama to Use a Custom Port (Optional)
+
+Example: use port 5005
+
+In ~/.ollama/config (macOS/Linux) or %USERPROFILE%\.ollama\config (Windows):
+
+[api]
+address = "0.0.0.0:5005"
+
+
+Then set your .env:
+
+OLLAMA_HOST=http://127.0.0.1:5005
 ⚙ Running the Bot
 ▶ Standard CLI Bot
 python run.py --paper
@@ -153,24 +243,20 @@ qwen
 deepseek
 phi
 
-⚙ .env Configuration
+⚙️ .env Configuration
 
-Your .env file controls everything.
+Your .env file controls all bot settings (API keys, model, behavior, trading parameters).
 
-# Manifold API key
-MANIFOLD_API_KEY=your_key_here
+First, copy the example file into a real .env file:
 
-# Bot behavior
-TARGET_CREATOR=MikhailTal
-MAX_MARKETS=50
-MAX_PAGES=1
+🪟 Windows (PowerShell)
+copy .env.example .env
 
-# Trading settings
-BET_SIZE=10
-MIN_PROB=0.05
-MAX_PROB=0.95
+🪟 Windows (CMD)
+copy .env.example .env
 
-# LLM settings
-USE_LLM=True
-OLLAMA_HOST=http://127.0.0.1:11434
-OLLAMA_MODEL=gpt-oss:120b-cloud
+🍎 macOS
+cp .env.example .env
+
+🐧 Linux
+cp .env.example .env
