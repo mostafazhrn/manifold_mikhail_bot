@@ -4,3 +4,5 @@ pandas
 pytest
 black
 ruff
+numpy
+scikit-learn       # for RandomForest, TF-IDF, SVD, scaling
