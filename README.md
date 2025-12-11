@@ -30,6 +30,7 @@ Searching internet sources (via built-in tool)
 
 Providing rational, human-like judgment
 
+Usage:
 ✔ Trading Modes
 
 --paper → Safe simulation, no live bets
@@ -45,6 +46,8 @@ Providing rational, human-like judgment
 A full graphical interface for non-technical users:
 
 python3 app_gui/app.py
+
+Installation:
 
 ✔ System Check
 python3 script/check_system.py
@@ -80,13 +83,14 @@ python scripts/system_check.py
 If everything is okay, you’ll see:
 
 === All checks completed successfully. ===
-ZIZO Bot uses a local LLM via Ollama, pointing to:
+The Bot uses a local LLM via Ollama, pointing to:
 
 
 
 If Ollama is not installed or not running, download and configure it using the steps below.
 
 🪟 Windows Installation
+
 1️⃣ Install Ollama
 
 Download and install from:
