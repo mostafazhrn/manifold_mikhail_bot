@@ -6,7 +6,7 @@ By default, it targets markets created by MikhailTal, but can be configured to t
 ZIZO Bot combines machine learning, local LLM reasoning, market-pattern analysis, and optional internet-augmented intelligence to deliver highly accurate predictions and automated trading.
 
 ## 📦 Features
-✔ Machine-Learning-powered predictions
+### ✔ Machine-Learning-powered predictions
 
 Trained on thousands of resolved Manifold markets using:
 
@@ -30,7 +30,7 @@ Searching internet sources (via built-in tool)
 
 Providing rational, human-like judgment
 
-Usage:
+## Usage:
 ✔ Trading Modes
 
 --paper → Safe simulation, no live bets
@@ -41,13 +41,13 @@ Usage:
 
 --help → Show CLI options
 
-✔ GUI Mode
+## ✔ GUI Mode
 
 A full graphical interface for non-technical users:
 
 python3 app_gui/app.py
 
-Installation:
+## Installation:
 
 ✔ System Check
 python3 script/check_system.py
@@ -64,7 +64,7 @@ Model installed
 
 Environment configuration
 
-🛠 Installation
+### 🛠 Installation
 1️⃣ Clone the repository
 git clone https://github.com/mostafazhrn/manifold_mikhail_bot.git
 cd manifold_mikhail_bot
@@ -87,9 +87,9 @@ The Bot uses a local LLM via Ollama, pointing to:
 
 
 
-If Ollama is not installed or not running, download and configure it using the steps below.
+## If Ollama is not installed or not running, download and configure it using the steps below.
 
-🪟 Windows Installation
+### 🪟 Windows Installation
 
 1️⃣ Install Ollama
 
@@ -108,7 +108,7 @@ http://127.0.0.1:11434/api/tags
 
 You should see JSON output.
 
-🍎 macOS Installation
+## 🍎 macOS Installation
 1️⃣ Install via Homebrew
 brew install ollama
 
@@ -118,7 +118,7 @@ brew services start ollama
 3️⃣ Check server
 curl http://127.0.0.1:11434/api/tags
 
-🐧 Linux Installation
+## 🐧 Linux Installation
 1️⃣ Install Ollama
 curl -fsSL https://ollama.com/install.sh | sh
 
@@ -128,7 +128,7 @@ systemctl start ollama
 3️⃣ Enable on boot
 systemctl enable ollama
 
-🌐 Exposing Ollama to the Network (Optional)
+## 🌐 Exposing Ollama to the Network (Optional)
 
 If you want other machines to use your Ollama instance, edit:
 
@@ -162,7 +162,7 @@ Linux:
 
 systemctl restart ollama
 
-🔌 Forcing Ollama to Use a Custom Port (Optional)
+## 🔌 Forcing Ollama to Use a Custom Port (Optional)
 
 Example: use port 5005
 
@@ -175,7 +175,8 @@ address = "0.0.0.0:5005"
 Then set your .env:
 
 OLLAMA_HOST=http://127.0.0.1:5005
-⚙ Running the Bot
+
+## ⚙ Running the Bot
 ▶ Standard CLI Bot
 python run.py --paper
 
@@ -197,7 +198,7 @@ To launch the graphical interface:
 
 python app_gui.py
 
- How the Intelligence Works
+ # How the Intelligence Works
  Machine Learning Model
 
 Located in: src/mikhail_bot/artifacts/
@@ -227,7 +228,7 @@ ZIZO Bot uses Ollama and by default:
 OLLAMA_MODEL=gpt-oss:120b-cloud
 
 
-The LLM is used for:
+## The LLM is used for:
 
 Reading the full question + options
 
@@ -247,7 +248,7 @@ qwen
 deepseek
 phi
 
-⚙️ .env Configuration
+## ⚙️ .env Configuration
 
 Your .env file controls all bot settings (API keys, model, behavior, trading parameters).
 
