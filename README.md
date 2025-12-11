@@ -1,11 +1,11 @@
-🚀 ZIZO Bot — Intelligent Manifold Trading Agent
+#🚀 ZIZO Bot — Intelligent Manifold Trading Agent
 
 A fully customizable, GUI-enabled, ML-powered and LLM-augmented trading bot for Manifold Markets.
 By default, it targets markets created by MikhailTal, but can be configured to trade on any creator, category, or tag.
 
 ZIZO Bot combines machine learning, local LLM reasoning, market-pattern analysis, and optional internet-augmented intelligence to deliver highly accurate predictions and automated trading.
 
-📦 Features
+##📦 Features
 ✔ Machine-Learning-powered predictions
 
 Trained on thousands of resolved Manifold markets using:
