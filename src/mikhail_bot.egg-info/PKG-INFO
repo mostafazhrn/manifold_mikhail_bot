@@ -1,0 +1,19 @@
+Metadata-Version: 2.4
+Name: mikhail_bot
+Version: 0.1.0
+Summary: Manifold MikhailTal trading bot
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Dynamic: license-file
+
+# Manifold Mikhail Bot
+
+Skeleton repo for a bot that trades only on markets created by `MikhailTal`.
+
+## Run (paper mode)
+```
+pip install -r requirements.txt
+cp .env.example .env
+python examples/run_bot.py --paper
+```

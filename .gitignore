@@ -1,0 +1,37 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Virtual environments
+.venv/
+venv/
+winvenv/
+
+# Environment variables
+.env
+
+# Logs
+logs/
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE settings
+.vscode/
+.idea/
+
+# Model artifacts
+models/*.pkl
+models/*.bin
+models/*.json
+
+# Datasets
+data/resolved_markets.jsonl
+data/*.csv
+data/*.jsonl
+
+# Training outputs
+checkpoints/
