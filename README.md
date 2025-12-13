@@ -127,6 +127,9 @@ systemctl start ollama
 3️⃣ Enable on boot
 systemctl enable ollama
 
+check it is running
+curl http://127.0.0.1:11434/api/tags
+
 ## 🌐 Exposing Ollama to the Network (Optional)
 
 If you want other machines to use your Ollama instance, edit:
