@@ -48,7 +48,7 @@ python3 app_gui/app.py
 
 ## Installation:
 
-✔ System Check
+### ✔ System Check
 python3 script/check_system.py
 
 Before running, The Bot automatically checks:
@@ -176,26 +176,26 @@ Then set your .env:
 OLLAMA_HOST=http://127.0.0.1:5005
 
 ## ⚙ Running the Bot
-▶ Standard CLI Bot
+### ▶ Standard CLI Bot
 python run.py --paper
 
-▶ Live Trading
+### ▶ Live Trading
 python run.py --live
 
-▶ Super-Intelligence Mode
+### ▶ Super-Intelligence Mode
 
 (Forces LLM-based reasoning every time)
 
 python run.py --super
 
-▶ Help
+### ▶ Help
 python run.py --help
 
-- GUI Mode
+### - GUI Mode
 
 To launch the graphical interface:
 
-python app_gui.py
+python app_gui/app.py
 
  # How the Intelligence Works
  Machine Learning Model
