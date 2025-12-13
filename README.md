@@ -1,9 +1,9 @@
-# 🚀 ZIZO Bot — Intelligent Manifold Trading Agent
+# 🚀 A super Intelligent Manifold Trading Agent
 
 A fully customizable, GUI-enabled, ML-powered and LLM-augmented trading bot for Manifold Markets.
 By default, it targets markets created by MikhailTal, but can be configured to trade on any creator, category, or tag.
 
-ZIZO Bot combines machine learning, local LLM reasoning, market-pattern analysis, and optional internet-augmented intelligence to deliver highly accurate predictions and automated trading.
+This Bot combines machine learning, local LLM reasoning, market-pattern analysis, and optional internet-augmented intelligence to deliver highly accurate predictions and automated trading For low to zero cost for running it.
 
 ## 📦 Features
 ### ✔ Machine-Learning-powered predictions
@@ -52,7 +52,7 @@ python3 app_gui/app.py
 ✔ System Check
 python3 script/check_system.py
 
-Before running, ZIZO Bot automatically checks:
+Before running, The Bot automatically checks:
 
 Python version
 
@@ -223,7 +223,7 @@ Behavioral patterns of market creators
 
 2️⃣ Local LLM Engine (Ollama)
 
-ZIZO Bot uses Ollama and by default:
+The Bot uses Ollama and by default:
 
 OLLAMA_MODEL=gpt-oss:120b-cloud
 
