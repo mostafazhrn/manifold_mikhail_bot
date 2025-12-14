@@ -16,6 +16,7 @@ import joblib
 import requests
 import numpy as np
 
+
 # -------------------------
 # Try to reuse legacy artifacts
 # -------------------------
@@ -86,8 +87,6 @@ BET_SMALL  = _get_int("BET_SMALL", 10)
 BET_LARGE_THRESHOLD  = _get_float("BET_LARGE_THRESHOLD", 0.15)
 BET_MEDIUM_THRESHOLD = _get_float("BET_MEDIUM_THRESHOLD", 0.30)
 
-DEFAULT_MODE = os.getenv("STRATEGY_MODE", "smart").lower()
-MODE = DEFAULT_MODE
 
 # -------------------------
 # Debug helper
@@ -328,7 +327,17 @@ def merge_ml_llm_mcq(per_scores: Dict[str, float], llm_raw: Any, answer_map: Dic
 
 from src.mikhail_bot import api  # your api.py fetch functions
 
-def smart_strategy_v4(market: dict, debug_mode=False, mode: str = DEFAULT_MODE):
+def smart_strategy_v4(market: dict, debug_mode=False, mode: str = None):
+    # 🔒 Runtime source of truth
+    if mode is None:
+        mode = os.getenv("STRATEGY_MODE", "smart").lower()
+
+    if mode not in ("smart", "super"):
+        debug(f"[WARN] Invalid STRATEGY_MODE='{mode}', falling back to 'smart'")
+        mode = "smart"
+
+    if debug_mode:
+        debug(f"[MODE] Active strategy mode = {mode.upper()}")
     """
     Unified strategy: binary + MCQ + free-response markets.
     Automatically fetches full market details for MCQs if answers missing.
@@ -404,12 +413,36 @@ def smart_strategy_v4(market: dict, debug_mode=False, mode: str = DEFAULT_MODE):
                 debug(f"[SKIP {market_id}] ML probability could not be computed.")
             return None
 
-        ask_llm = (mode=="super") or (ML_GRAY_LOW <= p_ml <= ML_GRAY_HIGH)
+        ####
+        # ------------------------------
+        # Decide whether to call LLM
+        # ------------------------------
+        ask_llm = False
+
+        if mode == "super":
+            ask_llm = True
+        elif ML_GRAY_LOW <= p_ml <= ML_GRAY_HIGH:
+            ask_llm = True
+
+        if debug_mode:
+            debug(f"[LLM {market_id}] ask_llm={ask_llm} (mode={mode}, p_ml={p_ml:.3f})")
+
+        # ------------------------------
+        # Call LLM if required
+        # ------------------------------
         llm_raw = None
+
         if ask_llm and evaluate_question_local:
-            if debug_mode:
-                debug(f"[LLM {market_id}] Calling LLM reasoner for gray-zone binary market...")
-            llm_raw = evaluate_question_local(question)
+            try:
+                reason = "SUPER MODE" if mode == "super" else "Gray-zone binary"
+                if debug_mode:
+                    debug(f"[LLM {market_id}] {reason} → calling LLM")
+                llm_raw = evaluate_question_local(question)
+            except Exception as e:
+                if debug_mode:
+                    debug(f"[LLM {market_id}] LLM call failed: {e}")
+                llm_raw = None
+
 
         result = merge_ml_llm_binary(p_ml, llm_raw)
         if debug_mode:
@@ -460,4 +493,4 @@ def smart_strategy_v4(market: dict, debug_mode=False, mode: str = DEFAULT_MODE):
 
 # Backward compatibility
 def smart_strategy(market: Dict[str, Any], debug: bool=False):
-    return smart_strategy_v4(market, debug_mode=debug, mode=MODE)
+    return smart_strategy_v4(market, debug_mode=debug, mode=None)

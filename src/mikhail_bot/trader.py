@@ -17,6 +17,8 @@ from typing import Optional, Callable, Any
 from src.mikhail_bot.market_filter import get_markets_by_creator
 from src.mikhail_bot.smart_strategy_v4 import smart_strategy  # fallback default
 from src.mikhail_bot.api import place_trade
+from src.mikhail_bot.ledger import has_traded, record_trade
+
 
 
 class Trader:
@@ -78,9 +80,15 @@ class Trader:
             if not mid:
                 print("[TRADER][WARN] Market without id/slug, skipping:", m.get("question") or m.get("name", "<unknown>"))
                 continue
-
+            #### 
+            # Skip if already processed in this run
             if mid in self.seen:
-                # Already processed in this run or previous runs
+                continue
+
+            # Skip if already traded in previous runs (ledger memory)
+            if has_traded(mid):
+                print(f"[TRADER][SKIP] Market {mid} already traded on. Skipping.")
+                self.seen.add(mid)
                 continue
 
             # mark seen early to avoid duplicate work in long runs
@@ -115,6 +123,7 @@ class Trader:
             # Decision expected to be a dict with at least 'side' and 'amount'
             side = decision.get("side")
             amount = decision.get("amount")
+            probability = decision.get("probability")
 
             if not side or amount is None or amount <= 0:
                 print(f"[PAPER] Smart strategy decided to skip market {mid} (no actionable side/amount). Decision: {decision}")
@@ -126,12 +135,22 @@ class Trader:
             else:
                 print(f"[LIVE] Placing trade for {mid}: {decision}")
                 try:
-                    # For multi-answer markets, 'side' may be an answer id or answer text;
-                    # place_trade handles mapping based on market type in api.py
                     res = place_trade(m, decision)
                     print("[LIVE] Trade result:", res)
+
+                    record_trade(
+                        market_id=mid,
+                        question=question,
+                        predicted_outcome=side,
+                        probability=probability,
+                        amount=amount,
+                        strategy=getattr(self.strategy, "__name__", "unknown"),
+                    )
+
+
                 except Exception as e:
                     print(f"[LIVE][ERROR] Trade failed for {mid}: {e}")
+
 
         print("Total markets displayed:", display_count)
         print("Finished run_once.")

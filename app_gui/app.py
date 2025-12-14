@@ -61,32 +61,16 @@ class BotRunner(threading.Thread):
     def __init__(self, trader: Trader, delay: int, stop_event: threading.Event, log_queue: queue.Queue):
         super().__init__(daemon=True)
         self.trader = trader
-        self.delay = max(1, int(delay))
         self.stop_event = stop_event
         self.log_queue = log_queue
-        self.markets_seen = 0
-        self.trades_simulated = 0
 
     def run(self):
         try:
-            while not self.stop_event.is_set():
-                start = time.time()
-                # run one pass
-                try:
-                    self.trader.run_once()
-                except Exception as e:
-                    self.log_queue.put(f"[RUNNER] Exception in run_once: {e}\n{traceback.format_exc()}")
-                # sleep for delay or until stopped
-                elapsed = time.time() - start
-                to_sleep = max(0, self.delay - elapsed)
-                if to_sleep > 0:
-                    # wait in small increments to be responsive to stop_event
-                    waited = 0
-                    while waited < to_sleep and not self.stop_event.is_set():
-                        time.sleep(0.2)
-                        waited += 0.2
+            self.log_queue.put("[RUNNER] Starting single run...")
+            self.trader.run_once()
+            self.log_queue.put("[RUNNER] run_once finished. Bot is idle.")
         except Exception as e:
-            self.log_queue.put(f"[RUNNER] Fatal exception: {e}\n{traceback.format_exc()}")
+            self.log_queue.put(f"[RUNNER] Exception: {e}\n{traceback.format_exc()}")
 
 
 class App(ctk.CTk):
@@ -150,11 +134,11 @@ class App(ctk.CTk):
         self.entry_max_markets.insert(0, "")
         self.entry_max_markets.pack(fill="x", padx=8, pady=(0, 8))
 
-        # Delay
-        ctk.CTkLabel(control_frame, text="Delay between runs (s):").pack(anchor="w", padx=8)
-        self.entry_delay = ctk.CTkEntry(control_frame)
-        self.entry_delay.insert(0, "30")
-        self.entry_delay.pack(fill="x", padx=8, pady=(0, 8))
+        # Delay (disabled – bot runs once)
+        #ctk.CTkLabel(control_frame, text="Delay between runs (disabled):").pack(anchor="w", padx=8)
+        #self.entry_delay = ctk.CTkEntry(control_frame, state="disabled")
+        #self.entry_delay.insert(0, "N/A")
+        #self.entry_delay.pack(fill="x", padx=8, pady=(0, 8))
 
         # Paper mode
         self.paper_var = ctk.BooleanVar(value=cfg_module.config.paper_mode)
@@ -226,14 +210,32 @@ class App(ctk.CTk):
         ctk.CTkLabel(train_left, text="Training Tools", font=ctk.CTkFont(size=18, weight="bold")).pack(pady=(4, 8))
 
         # Fetch resolved markets button
-        self.btn_fetch = ctk.CTkButton(train_left, text="Fetch Resolved Markets", command=self.start_fetch_resolved)
+        self.btn_fetch = ctk.CTkButton(
+            train_left,
+            text="Fetch Resolved Markets",
+            command=self.start_fetch_resolved
+        )
         self.btn_fetch.pack(fill="x", padx=8, pady=(6, 6))
 
+        # Check bot stats button  ✅ NEW
+        self.btn_stats = ctk.CTkButton(
+            train_left,
+            text="Check Bot Stats",
+            fg_color="#2E8B57",
+            command=self.run_simple_stats
+        )
+        self.btn_stats.pack(fill="x", padx=8, pady=(6, 6))
+
         # Max to fetch override
-        ctk.CTkLabel(train_left, text="Max resolved to fetch (leave blank = .env)").pack(anchor="w", padx=8)
+        ctk.CTkLabel(
+            train_left,
+            text="Max resolved to fetch (leave blank = .env)"
+        ).pack(anchor="w", padx=8)
+
         self.entry_max_resolved = ctk.CTkEntry(train_left)
         self.entry_max_resolved.insert(0, "")
         self.entry_max_resolved.pack(fill="x", padx=8, pady=(0, 8))
+
 
         # Train model button
         self.btn_train = ctk.CTkButton(train_left, text="Train Model", command=self.start_train_model)
@@ -390,6 +392,45 @@ class App(ctk.CTk):
 
         except Exception as e:
             self.log_queue.put(f"[SystemCheck] Exception: {e}")
+    ####
+    def run_simple_stats(self):
+        """
+        Runs simple_stats.py and prints its output to the training console.
+        """
+        script_path = os.path.join(
+            ROOT,
+            "src",
+            "mikhail_bot",
+            "simple_stats.py"
+        )
+
+        if not os.path.exists(script_path):
+            self.train_log_queue.put("[STATS] ERROR: simple_stats.py not found.")
+            return
+
+        self.train_log_queue.put("[STATS] Running bot performance stats...\n")
+
+        def _runner():
+            try:
+                result = subprocess.run(
+                    [sys.executable, script_path],
+                    capture_output=True,
+                    text=True
+                )
+
+                if result.stdout:
+                    for line in result.stdout.splitlines():
+                        self.train_log_queue.put("[STATS] " + line)
+
+                if result.stderr:
+                    for line in result.stderr.splitlines():
+                        self.train_log_queue.put("[STATS-ERR] " + line)
+
+            except Exception as e:
+                self.train_log_queue.put(f"[STATS] Exception: {e}")
+
+        threading.Thread(target=_runner, daemon=True).start()
+
 
 
     def _run_train_model(self, test_frac_override=None):
@@ -464,20 +505,19 @@ class App(ctk.CTk):
         except Exception:
             self.log_queue.put("[GUI] Invalid max_markets; ignoring")
 
-        delay = 30
-        try:
-            delay = int(self.entry_delay.get().strip())
-        except Exception:
-            self.log_queue.put("[GUI] Invalid delay; using 30s")
+        #delay = 30
+        #try:
+        #    delay = int(self.entry_delay.get().strip())
+        #except Exception:
+        #    self.log_queue.put("[GUI] Invalid delay; using 30s")
 
         paper = bool(self.paper_var.get())
         mode = self.mode_var.get()
 
-        # set mode immediately
-        try:
-            set_mode(mode)
-        except Exception:
-            pass
+        # 🔒 HARD SOURCE OF TRUTH (used by smart_strategy_v4)
+        os.environ["STRATEGY_MODE"] = mode
+
+        self.log_queue.put(f"[GUI] STRATEGY_MODE={mode}")
 
         # instantiate Trader with overrides
         trader = Trader(paper=paper, strategy=None, max_pages=max_pages, max_markets=max_markets)
@@ -486,7 +526,7 @@ class App(ctk.CTk):
         sys.stdout = self.stdout_redirector
 
         self.runner_stop_event = threading.Event()
-        self.runner_thread = BotRunner(trader=trader, delay=delay, stop_event=self.runner_stop_event, log_queue=self.log_queue)
+        self.runner_thread = BotRunner(trader=trader, delay=0, stop_event=self.runner_stop_event, log_queue=self.log_queue)
         self.runner_thread.start()
         self.log_queue.put("[GUI] Bot started")
 

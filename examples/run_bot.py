@@ -28,11 +28,11 @@ SmartStrategy_callable = None
 
 try:
     # import the module so we can call set_mode() and smart_strategy()
-    from src.mikhail_bot import smart_strategy_v3 as SmartStrategy_module
+    from src.mikhail_bot import smart_strategy_v4 as SmartStrategy_module
     # helper and callable
     SmartStrategy_set_mode = getattr(SmartStrategy_module, "set_mode", None)
     SmartStrategy_callable = getattr(SmartStrategy_module, "smart_strategy", None)
-    print("[RUN_BOT] Loaded SmartStrategyV3 module successfully.")
+    print("[RUN_BOT] Loaded SmartStrategyV4 module successfully.")
 except Exception as e:
     print("[RUN_BOT][ERROR] Failed to import SmartStrategyV3:", e)
     SmartStrategy_module = None

@@ -28,6 +28,56 @@ from pathlib import Path
 import requests
 from dotenv import load_dotenv
 
+# -------------------- optional OpenAI API --------------------
+try:
+    import openai
+    OPENAI_AVAILABLE = True
+except ImportError:
+    OPENAI_AVAILABLE = False
+
+
+# -------------------- optional OpenAI API --------------------
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-4")
+
+from openai import OpenAI
+
+_openai_client = None
+
+def call_openai(prompt: str, timeout: int = 60) -> Tuple[bool, str]:
+    global _openai_client
+
+    if not OPENAI_API_KEY:
+        return False, "No OpenAI key"
+
+    try:
+        if _openai_client is None:
+            _openai_client = OpenAI(api_key=OPENAI_API_KEY)
+
+        response = _openai_client.responses.create(
+            model=OPENAI_MODEL,  # e.g. "gpt-4.1" or "gpt-4o"
+            input=[
+                {
+                    "role": "user",
+                    "content": [
+                        {"type": "input_text", "text": prompt}
+                    ]
+                }
+            ],
+             # tools=[{"type": "web_search"}],   # ← enable only if you want OpenAI browsing
+             # tool_choice="auto",               # ← must be enabled together with tools
+            max_output_tokens=1024,
+            temperature=0.0,
+            timeout=timeout,
+        )
+
+        text = response.output_text
+        return True, text.strip()
+
+    except Exception as e:
+        debug(f"OpenAI call failed: {e}")
+        return False, str(e)
+
 # -------------------- configuration --------------------
 REPO_ROOT = Path(__file__).resolve().parents[0]
 dotenv_path = REPO_ROOT / ".env"
@@ -402,9 +452,60 @@ def reason(question: str,
     # Build prompt WITHOUT JSON schema instructions
     prompt = build_prompt(question, clean_answers, web_ctx, None)
 
-    # Run Ollama LLM
-    ok, resp_text = call_ollama(prompt)
-    debug(f"ollama returned {len(resp_text)} chars")
+    # --- Try OpenAI API first ---
+    use_openai = False
+    if OPENAI_AVAILABLE and OPENAI_API_KEY:
+        ok, resp_text = call_openai(prompt)
+        if ok:
+            debug(f"OpenAI returned {len(resp_text)} chars")
+            parsed_obj, _ = extract_json_object(resp_text)
+            if parsed_obj:
+                debug("Using OpenAI result")
+                use_openai = True
+                # ---------- BINARY MARKET OUTPUT ----------
+                if clean_answers and _answers_imply_binary(clean_answers):
+                    bo = str(parsed_obj.get("best_option", "")).strip().lower()
+                    try:
+                        conf_val = float(parsed_obj.get("confidence", 0.0))
+                    except:
+                        conf_val = 0.0
+                    yes_pct = 0
+                    if bo in ("yes", "y", "true", "t", "1"):
+                        yes_pct = int(conf_val * 100) if conf_val <= 1.01 else int(conf_val)
+                    elif bo in ("no", "n", "false", "f", "0"):
+                        p = conf_val if conf_val <= 1.01 else conf_val / 100.0
+                        yes_pct = int(max(0.0, (1.0 - p) * 100))
+                    else:
+                        try:
+                            raw_yes = parsed_obj.get("yes", None)
+                            if raw_yes is not None:
+                                y = float(raw_yes)
+                                yes_pct = int(y if y > 1.01 else y * 100)
+                            else:
+                                yes_pct = int(conf_val * 100)
+                        except:
+                            yes_pct = int(conf_val * 100)
+                    yes_pct = max(0, min(100, yes_pct))
+                    return {"yes": yes_pct, "reasoning": parsed_obj.get("reasoning", "")}
+                else:
+                    best = parsed_obj.get("best_option", None)
+                    conf = parsed_obj.get("confidence", 0.0)
+                    reas = parsed_obj.get("reasoning", "")
+                    try:
+                        conf_f = float(conf)
+                        if conf_f > 1.01:
+                            conf_f = conf_f / 100.0
+                    except:
+                        conf_f = 0.0
+                    return {"best_option": best, "confidence": float(conf_f), "reasoning": reas}
+        else:
+            debug("OpenAI failed or returned invalid JSON, falling back to normal pipeline")
+
+    # --- Fall back to normal Ollama + Bing/Brave/Serp/Serper/DDG pipeline ---
+    if not use_openai:
+        ok, resp_text = call_ollama(prompt)
+        debug(f"ollama returned {len(resp_text)} chars")
+
 
     if not ok:
         return {
