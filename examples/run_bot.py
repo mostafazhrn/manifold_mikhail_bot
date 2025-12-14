@@ -7,17 +7,28 @@ Usage:
     python examples/run_bot.py --paper --super   # enable super LLM mode
 """
 
-import sys
-import os
 import argparse
+from pathlib import Path
 
+from dotenv import load_dotenv
+from pathlib import Path
+import os, sys
+
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT))
+
+load_dotenv(ROOT / ".env")
+
+print("[RUN_BOT] ENV STRATEGY_MODE =", os.getenv("STRATEGY_MODE"))
+print("[RUN_BOT] ENV LLM_PROVIDER  =", os.getenv("LLM_PROVIDER"))
+print("[RUN_BOT] ENV OPENAI KEY    =", bool(os.getenv("OPENAI_API_KEY")))
 # ------------------------------------------------------------
 # Path setup
 # ------------------------------------------------------------
-ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-sys.path.append(ROOT)
+#ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+#sys.path.append(ROOT)
 
-print("[RUN_BOT] Root path added:", ROOT)
+#print("[RUN_BOT] Root path added:", ROOT)
 
 # ------------------------------------------------------------
 # Import strategy module + trader
@@ -39,12 +50,12 @@ except Exception as e:
     SmartStrategy_set_mode = None
     SmartStrategy_callable = None
 
-try:
-    from src.mikhail_bot.trader import Trader
-    print("[RUN_BOT] Trader imported successfully.")
-except Exception as e:
-    print("[RUN_BOT][CRITICAL] Cannot import Trader:", e)
-    raise
+#try:
+ #   from src.mikhail_bot.trader import Trader
+ #  print("[RUN_BOT] Trader imported successfully.")
+#except Exception as e:
+ #   print("[RUN_BOT][CRITICAL] Cannot import Trader:", e)
+  #  raise
 
 # Optional: for paper trade logging
 try:
@@ -71,10 +82,24 @@ def main():
     args = parser.parse_args()
 
     # Decide live or paper mode
-    paper = True if args.paper or not args.live else False
-    mode = "PAPER" if paper else "LIVE"
-    print(f"[RUN_BOT] Mode selected: {mode}")
+    if args.live:
+        paper = False
+    elif args.paper:
+        paper = True
+    else:
+        paper = True  # default safety
+    
+    # 🔒 CLI is source of truth for paper/live
+    os.environ["PAPER_MODE"] = "true" if paper else "false"
+    print(f"[RUN_BOT] ENV PAPER_MODE overridden to {os.environ['PAPER_MODE']}")
 
+
+    mode = "LIVE" if not paper else "PAPER"
+    print(f"[RUN_BOT] Mode selected: {mode}")
+    from src.mikhail_bot.trader import Trader
+    print("[RUN_BOT] Trader imported AFTER PAPER_MODE was set.")
+
+    
     # If user requested super, call set_mode on the strategy module
     if args.super:
         if SmartStrategy_set_mode is None:

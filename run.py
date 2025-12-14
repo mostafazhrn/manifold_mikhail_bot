@@ -37,4 +37,7 @@ except FileNotFoundError:
     print("[WARN] No check_system.py found.")
 
 # 2. Launch the bot
-subprocess.run([str(VENV_PY), "examples/run_bot.py", "--paper"], check=True)
+subprocess.run(
+    [str(VENV_PY), "examples/run_bot.py", *sys.argv[1:]],
+    check=True
+)
