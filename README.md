@@ -1,4 +1,4 @@
-# 🚀 A super Intelligent Manifold Trading Agent
+# 🚀 A super Intelligent GUI Manifold Trading Agent
 
 A fully customizable, GUI-enabled trading bot for Manifold Markets that leverages machine learning and LLM-augmented reasoning. By default, it targets markets created by MikhailTal, but can be configured to trade across any creator, category, or tag, supporting all Manifold market types.
 
@@ -46,7 +46,49 @@ A full graphical interface for non-technical users:
 
 python3 app_gui/app.py
 
-## Installation:
+### 🛠 Installation
+1️⃣ Clone the repository
+git clone https://github.com/mostafazhrn/manifold_mikhail_bot.git
+cd manifold_mikhail_bot
+
+2️⃣ Create & activate local virtual environment (Windows)
+python -m venv winvenv
+winvenv\Scripts\activate
+
+3️⃣ Install dependencies
+pip install -r requirements.txt
+
+4️⃣ Run the system check
+python scripts/system_check.py
+
+If everything is okay, you’ll see:
+
+=== All checks completed successfully. ===
+The Bot uses a local LLM via Ollama, pointing to:
+
+
+5️⃣ Your .env file controls all bot settings (API keys, model, behavior, trading parameters).
+
+First, copy the example file into a real .env file (see .env configuration below for more details)
+
+## ⚙️ .env Configuration
+
+Your .env file controls all bot settings (API keys, model, behavior, trading parameters).
+
+First, copy the example file .env.example into a real .env file:
+
+🪟 Windows (PowerShell)
+copy .env.example .env
+
+🪟 Windows (CMD)
+copy .env.example .env
+
+🍎 macOS
+cp .env.example .env
+
+🐧 Linux
+cp .env.example .env
+
 
 ### ✔ System Check
 python3 script/check_system.py
@@ -63,28 +105,8 @@ Model installed
 
 Environment configuration
 
-### 🛠 Installation
-1️⃣ Clone the repository
-git clone https://github.com/mostafazhrn/manifold_mikhail_bot.git
-cd manifold_mikhail_bot
-
-2️⃣ Create & activate local virtual environment (Windows)
-python -m venv winvenv
-winvenv\Scripts\activate
-
-3️⃣ Install dependencies
-pip install -r requirements.txt
-
-4️⃣ Run the system check
-python scripts/system_check.py
-
-
-If everything is okay, you’ll see:
-
-=== All checks completed successfully. ===
-The Bot uses a local LLM via Ollama, pointing to:
-
-
+## Make sure Ollama is installed and running by calling its api locally 
+on http://127.0.0.1:11434/api/tags
 
 ## If Ollama is not installed or not running, download and configure it using the steps below.
 
@@ -104,8 +126,8 @@ Open your browser:
 
 http://127.0.0.1:11434/api/tags
 
-
 You should see JSON output.
+
 
 ## 🍎 macOS Installation
 1️⃣ Install via Homebrew
@@ -179,6 +201,14 @@ Then set your .env:
 OLLAMA_HOST=http://127.0.0.1:5005
 
 ## ⚙ Running the Bot
+
+### - GUI Mode
+
+To launch the graphical interface:
+
+python app_gui/app.py
+
+
 ### ▶ Standard CLI Bot
 python run.py --paper
 
@@ -194,11 +224,6 @@ python run.py --super
 ### ▶ Help
 python run.py --help
 
-### - GUI Mode
-
-To launch the graphical interface:
-
-python app_gui/app.py
 
  # How the Intelligence Works
  Machine Learning Model
@@ -222,6 +247,7 @@ Probability distributions
 Question structures
 
 Behavioral patterns of market creators
+
 
 2️⃣ Local LLM Engine (Ollama)
 
@@ -249,24 +275,6 @@ mistral
 qwen
 deepseek
 phi
-
-## ⚙️ .env Configuration
-
-Your .env file controls all bot settings (API keys, model, behavior, trading parameters).
-
-First, copy the example file into a real .env file:
-
-🪟 Windows (PowerShell)
-copy .env.example .env
-
-🪟 Windows (CMD)
-copy .env.example .env
-
-🍎 macOS
-cp .env.example .env
-
-🐧 Linux
-cp .env.example .env
 
 🐧 Linux
 cp .env.example .env
