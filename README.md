@@ -66,7 +66,21 @@ If everything is okay, you’ll see:
 === All checks completed successfully. ===
 The Bot uses a local LLM via Ollama, pointing to:
 
+### 🔑 API Keys & Environment Configuration
 
+Before running the bot, you must configure your API keys in a .env file.
+Please follow the instructions below to create and set up your own .env file.
+
+Ensure that all required keys are correctly filled in; missing or invalid keys may result in limited functionality or runtime errors.
+
+### 🤖 LLM Configuration (Optional)
+
+By default, the bot supports local LLM inference using Ollama.
+
+If you prefer not to install a local LLM, you can instead use the OpenAI API (ChatGPT-5) by adding your OpenAI API key to the .env file.
+Once configured, the bot will automatically use OpenAI as the LLM backend.
+
+Note: At least one LLM provider (Ollama or OpenAI) must be configured for Super mode to function correctly.
 5️⃣ Your .env file controls all bot settings (API keys, model, behavior, trading parameters).
 
 First, copy the example file into a real .env file (see .env configuration below for more details)
@@ -104,6 +118,16 @@ Ollama server running
 Model installed
 
 Environment configuration
+
+## important notes:
+
+### Before launching the GUI for the first time, 
+Please run the following commands from the repository root, in this order:
+
+python3 src/fetch_resolved_markets.py
+python3 src/train_model.py
+
+In order to avoid any runtime errors or fallback behavior.
 
 ## Make sure Ollama is installed and running by calling its api locally 
 on http://127.0.0.1:11434/api/tags
