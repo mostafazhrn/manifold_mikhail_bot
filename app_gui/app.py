@@ -286,11 +286,8 @@ class App(ctk.CTk):
 
     def apply_mode(self):
         mode = self.mode_var.get()
-        try:
-            set_mode(mode)
-            self.log_queue.put(f"[GUI] Strategy mode set to '{mode}'")
-        except Exception as e:
-            self.log_queue.put(f"[GUI] Failed to set mode: {e}")
+        os.environ["STRATEGY_MODE"] = mode
+        self.log_queue.put(f"[GUI] Strategy mode set to '{mode}' (will apply on next run)")
 
     # -------------------------
     # Training & Fetch runners
