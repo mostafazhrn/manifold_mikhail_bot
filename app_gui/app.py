@@ -255,9 +255,24 @@ class App(ctk.CTk):
         self.txt_train_logs = scrolledtext.ScrolledText(train_right, wrap="word", state="disabled", height=30)
         self.txt_train_logs.pack(expand=True, fill="both", padx=6, pady=6)
 
+        train_btn_frame = ctk.CTkFrame(train_right)
+        train_btn_frame.pack(fill="x", padx=6, pady=(0, 6))
+
+        self.btn_clear_train_logs = ctk.CTkButton(
+            train_btn_frame,
+            text="Clear Training Logs",
+            command=self.clear_train_logs
+        )
+        self.btn_clear_train_logs.pack(side="left")
+
         # Redirector placeholder: we'll redirect only when training/fetching runs
         self.train_log_queue = queue.Queue()
         self.after(100, self._poll_train_log_queue)
+
+    def clear_train_logs(self):
+        self.txt_train_logs.config(state="normal")
+        self.txt_train_logs.delete("1.0", "end")
+        self.txt_train_logs.config(state="disabled")
 
     def clear_logs(self):
         self.txt_logs.config(state="normal")
@@ -319,6 +334,7 @@ class App(ctk.CTk):
             return
 
         env = os.environ.copy()
+        env["PYTHONUNBUFFERED"] = "1"  # 🔥 KEY LINE
 
         if max_resolved_override and str(max_resolved_override).strip():
             env["MAX_RESOLVED_MARKETS"] = str(max_resolved_override)
@@ -329,23 +345,28 @@ class App(ctk.CTk):
         self.train_log_queue.put("[TRAIN] Fetch started")
 
         try:
-            result = subprocess.run(
-                [sys.executable, script_path],
-                capture_output=True,
+            process = subprocess.Popen(
+                [sys.executable, "-u", script_path],  # -u = unbuffered
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
                 text=True,
                 env=env
             )
 
-            if result.stdout:
-                for line in result.stdout.splitlines():
-                    self.train_log_queue.put(line)
+            # Read stdout live
+            for line in process.stdout:
+                self.train_log_queue.put(line.rstrip())
 
-            if result.stderr:
-                for line in result.stderr.splitlines():
-                    self.train_log_queue.put("[ERR] " + line)
+            # Read stderr live
+            for line in process.stderr:
+                self.train_log_queue.put("[ERR] " + line.rstrip())
+
+            process.wait()
+            self.train_log_queue.put("[TRAIN] Fetch completed")
 
         except Exception as e:
             self.train_log_queue.put(f"[TRAIN] Fetch failed: {e}")
+
 
     def start_fetch_resolved(self):
         # prevent double start
