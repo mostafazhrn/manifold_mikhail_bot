@@ -35,3 +35,6 @@ data/*.jsonl
 
 # Training outputs
 checkpoints/
+
+# ML model artifacts
+src/mikhail_bot/model_artifacts/

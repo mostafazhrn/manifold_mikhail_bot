@@ -33,18 +33,19 @@ except Exception:
     legacy = None
 
 # -------------------------
-# Load artifacts from disk if missing
+# Load artifacts from disk if missing (FIXED)
 # -------------------------
-ARTIFACT_DIR = Path("src/mikhail_bot/artifacts")
+ARTIFACT_DIR = Path(__file__).resolve().parent / "model_artifacts"
+
 if TFIDF is None or SVD is None or SCALER is None or MODEL is None:
     try:
-        TFIDF = joblib.load(ARTIFACT_DIR / "TFIDF.joblib")
-        SVD = joblib.load(ARTIFACT_DIR / "SVD.joblib")
-        SCALER = joblib.load(ARTIFACT_DIR / "SCALER.joblib")
-        MODEL = joblib.load(ARTIFACT_DIR / "MODEL.joblib")
+        TFIDF   = joblib.load(ARTIFACT_DIR / "TFIDF.joblib")
+        SVD     = joblib.load(ARTIFACT_DIR / "SVD.joblib")
+        SCALER  = joblib.load(ARTIFACT_DIR / "SCALER.joblib")
+        MODEL   = joblib.load(ARTIFACT_DIR / "MODEL.joblib")
     except Exception as e:
         TFIDF = SVD = SCALER = MODEL = None
-        print(f"[SMART_V4 {time.strftime('%Y-%m-%d %H:%M:%S')}] Warning: could not load artifacts: {e}")
+        print(f"[SMART_V4] Artifact load failed from {ARTIFACT_DIR}: {e}")
 
 # -------------------------
 # LLM reasoner

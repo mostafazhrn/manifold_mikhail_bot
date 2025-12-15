@@ -33,7 +33,7 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report, log_loss
 
-ARTIFACT_DIR = Path("src/mikhail_bot/model_artifacts")
+ARTIFACT_DIR = Path(__file__).resolve().parent / "mikhail_bot" / "model_artifacts"
 ARTIFACT_DIR.mkdir(parents=True, exist_ok=True)
 
 def _norm_prob(p):
