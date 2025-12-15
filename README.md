@@ -66,7 +66,7 @@ If everything is okay, you’ll see:
 === All checks completed successfully. ===
 The Bot uses a local LLM via Ollama, pointing to:
 
-## make sure to fill your API keys 
+## make sure to fill your API keys in .env file (follow instructions below to setup your own .env file)
 ### N.B for users who don't want to install local LLM using OLLAMA you can use OpenAI API to use chatgpt 5 instead just add your api in the .env file
 
 5️⃣ Your .env file controls all bot settings (API keys, model, behavior, trading parameters).
