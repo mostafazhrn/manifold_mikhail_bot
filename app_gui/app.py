@@ -36,7 +36,7 @@ from tkinter import scrolledtext
 
 # Import your bot components
 from src.mikhail_bot.trader import Trader
-from src.mikhail_bot.smart_strategy_v3 import set_mode
+#from src.mikhail_bot.smart_strategy_v3 import set_mode
 from src.mikhail_bot import config as cfg_module
 
 
