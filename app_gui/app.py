@@ -309,46 +309,43 @@ class App(ctk.CTk):
             self.after(100, self._poll_train_log_queue)
 
     def _run_fetch_resolved(self, max_resolved_override=None):
-        # Import dynamically so GUI starts even if modules missing
+        script_path = os.path.join(ROOT, "src", "fetch_resolved_markets.py")
+
+        if not os.path.exists(script_path):
+            script_path = os.path.join(ROOT, "fetch_resolved_markets.py")
+
+        if not os.path.exists(script_path):
+            self.train_log_queue.put("[TRAIN] fetch_resolved_markets.py not found.")
+            return
+
+        env = os.environ.copy()
+
+        if max_resolved_override and str(max_resolved_override).strip():
+            env["MAX_RESOLVED_MARKETS"] = str(max_resolved_override)
+            self.train_log_queue.put(
+                f"[TRAIN] Using GUI override MAX_RESOLVED_MARKETS={max_resolved_override}"
+            )
+
+        self.train_log_queue.put("[TRAIN] Fetch started")
+
         try:
-            try:
-                from src import fetch_resolved_markets as fetch_mod
-                fetch_fn = fetch_mod.fetch_all_resolved
-            except Exception:
-                try:
-                    # fallback to module at repo root
-                    import fetch_resolved_markets as fetch_mod
-                    fetch_fn = fetch_mod.fetch_all_resolved
-                except Exception:
-                    self.train_log_queue.put("[TRAIN] Could not import fetch_all_resolved. Ensure script exists.")
-                    return
+            result = subprocess.run(
+                [sys.executable, script_path],
+                capture_output=True,
+                text=True,
+                env=env
+            )
 
-            # Optionally set env override
-            if max_resolved_override is not None and str(max_resolved_override).strip():
-                os.environ["MAX_RESOLVED_MARKETS"] = str(max_resolved_override)
-                self.train_log_queue.put(f"[TRAIN] Overriding MAX_RESOLVED_MARKETS = {max_resolved_override}")
+            if result.stdout:
+                for line in result.stdout.splitlines():
+                    self.train_log_queue.put(line)
 
-            # Redirect prints to train_log_queue
-            orig_stdout = sys.stdout
-            class QueueWriter:
-                def __init__(self, q):
-                    self.q = q
-                def write(self, s):
-                    if s and not str(s).isspace():
-                        self.q.put(str(s))
-                def flush(self):
-                    pass
-            sys.stdout = QueueWriter(self.train_log_queue)
-
-            try:
-                fetch_fn()
-            except Exception as e:
-                self.train_log_queue.put(f"[TRAIN] fetch_all_resolved raised: {e}\n")
-            finally:
-                sys.stdout = orig_stdout
+            if result.stderr:
+                for line in result.stderr.splitlines():
+                    self.train_log_queue.put("[ERR] " + line)
 
         except Exception as e:
-            self.train_log_queue.put(f"[TRAIN] Unexpected error in fetch runner: {e}\n")
+            self.train_log_queue.put(f"[TRAIN] Fetch failed: {e}")
 
     def start_fetch_resolved(self):
         # prevent double start
