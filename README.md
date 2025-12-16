@@ -134,7 +134,7 @@ In order to avoid any runtime errors or fallback behavior.
 
 ## Make sure Ollama is installed and running by calling its api locally 
 on http://127.0.0.1:11434/api/tags
-### when working properly you will see sth like this
+### When working properly you will see something like this;
 {
   "models": [
     {
@@ -143,6 +143,9 @@ on http://127.0.0.1:11434/api/tags
       "remote_model": "gpt-oss:120b",
 ...........   
 }
+
+### Note: Before using the manifold bot make sure that at least one LLM model is installed on Ollama and ask it at least one question to verify it is working
+### Also it is recommended to leave the ollama GUI running when using our Bot (to avoid any runtime errors or fallbacks)
 
 ## If Ollama is not installed or not running, download and configure it using the steps below.
 
