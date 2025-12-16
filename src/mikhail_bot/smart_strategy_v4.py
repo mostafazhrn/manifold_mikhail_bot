@@ -251,6 +251,28 @@ def _compute_ml_probs_for_answers(market: Dict[str, Any], debug_mode=False, mark
     ssum = sum(per_scores.values()) or 1.0
     return {k: v/ssum for k, v in per_scores.items()}
 
+### LLM merge logic
+def llm_to_p_yes(llm_choice: Optional[str], llm_conf: Optional[float]) -> float:
+    """
+    Convert LLM (choice, confidence) into P(YES).
+
+    Rules:
+    - Confidence < 0.5 → abstain (0.5)
+    - YES with strong confidence → conf
+    - NO with strong confidence → 1 - conf
+    - Any invalid output → abstain
+    """
+    if llm_conf is None or llm_conf < 0.5:
+        return 0.5
+
+    if llm_choice == "YES":
+        return llm_conf
+
+    if llm_choice == "NO":
+        return 1.0 - llm_conf
+
+    return 0.5
+
 # -------------------------
 # Merge helpers
 # -------------------------
@@ -264,12 +286,8 @@ def merge_ml_llm_binary(p_ml: float, llm_raw: Any):
     reason_llm = llm_out.get("reasoning", "")
 
     # Convert LLM into YES probability
-    if llm_choice == "YES":
-        p_llm_yes = llm_conf if llm_conf is not None else 0.5
-    elif llm_choice == "NO":
-        p_llm_yes = 1.0 - llm_conf if llm_conf is not None else 0.5
-    else:
-        p_llm_yes = 0.5
+    # Convert LLM output into YES probability (safe, fool-proof)
+    p_llm_yes = llm_to_p_yes(llm_choice, llm_conf)
 
     # -------------------------
     # Dynamic merge (ML vs LLM)
