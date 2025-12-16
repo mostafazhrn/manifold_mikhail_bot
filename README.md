@@ -1,8 +1,9 @@
 # 🚀 A super Intelligent GUI Manifold Trading Agent
 
-A fully customizable, GUI-enabled trading bot for Manifold Markets that leverages machine learning and LLM-augmented reasoning. By default, it targets markets created by MikhailTal, but can be configured to trade across any creator, category, or tag, supporting all Manifold market types.
+A fully customizable, GUI-enabled trading bot for Manifold Markets that leverages machine learning and LLM-augmented reasoning. 
+By default, it targets markets created by MikhailTal, but can be configured to trade across any creator, category, or tag, supporting all Manifold market types.
 
-This bot integrates machine learning, local LLM-based reasoning, and market pattern analysis, with optional internet-augmented intelligence, to deliver highly accurate predictions and automated trading at minimal to near-zero operating cost.
+This bot integrates machine learning, local LLM-based reasoning, and market pattern analysis, with internet-augmented intelligence, to deliver highly accurate predictions and automated trading at minimal to near-zero operating cost.
 
 ## 📦 Features
 ### ✔ Machine-Learning-powered predictions
