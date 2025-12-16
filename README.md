@@ -134,6 +134,15 @@ In order to avoid any runtime errors or fallback behavior.
 
 ## Make sure Ollama is installed and running by calling its api locally 
 on http://127.0.0.1:11434/api/tags
+### when working properly you will see sth like this
+{
+  "models": [
+    {
+      "name": "gpt-oss:120b-cloud",
+      "model": "gpt-oss:120b-cloud",
+      "remote_model": "gpt-oss:120b",
+...........   
+}
 
 ## If Ollama is not installed or not running, download and configure it using the steps below.
 
